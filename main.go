@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"time"
 
+    "github.com/aptible/supercronic/cronexpr"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -32,6 +33,7 @@ func main() {
 	var (
 		addr              = flag.String("listen-address", ":8080", "The address to listen on for HTTP requests.")
 		oscillationPeriod = flag.Duration("oscillation-period", 1*time.Minute, "The duration of the rate oscillation period.")
+		cronExpr = flag.String("cron-expression", "*/2 * * * *", "Cron expression.")
 	)
 
 	flag.Parse()
@@ -59,6 +61,22 @@ func main() {
 	))
 	// Register the summary and the histogram with Prometheus's default registry.
 	prometheus.MustRegister(rpcDurations)
+
+	var timeInterval = prometheus.NewGaugeFunc(
+		prometheus.GaugeOpts{
+			Name: "time_interval",
+			Help: "",
+		},
+		func() float64 {
+			now := time.Now()
+			nextTime := cronexpr.MustParse(*cronExpr).Next(now)
+			if nextTime.Sub(now) < 1*time.Minute {
+				return 1
+			}
+			return 0
+		},
+	)
+	prometheus.MustRegister(timeInterval)
 	// Add Go module build info.
 	prometheus.MustRegister(collectors.NewBuildInfoCollector())
 
