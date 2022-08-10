@@ -1,4 +1,3 @@
-// Copyright 2015 The Prometheus Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,6 +13,7 @@
 // A simple example exposing fictional RPC latencies with different types of
 // random distributions (uniform, normal, and exponential) as Prometheus
 // metrics.
+
 package main
 
 import (
@@ -32,9 +32,16 @@ import (
 func main() {
 	var (
 		addr              = flag.String("listen-address", ":8080", "The address to listen on for HTTP requests.")
-		oscillationPeriod = flag.Duration("oscillation-period", 1*time.Minute, "The duration of the rate oscillation period.")
-		cronExpr = flag.String("cron-expression", "*/2 * * * *", "Cron expression.")
+		oscillationPeriod = flag.Duration("oscillation-period", 5*time.Minute, "The duration of the rate oscillation period.")
+		// cronExpr = flag.String("cron-expression", "*/5 * * * *", "Cron expression.")
+		cronExpr = cronexpr.MustParse("0-5,10-15,20-25,30-35,40-45,50-55 * * * *")
 	)
+
+    flag.Func("cron-expression", "Cron expression", func(flagValue string) error {
+        var err error
+        cronExpr, err = cronexpr.Parse(flagValue)
+        return err
+    })
 
 	flag.Parse()
 
@@ -69,7 +76,7 @@ func main() {
 		},
 		func() float64 {
 			now := time.Now()
-			nextTime := cronexpr.MustParse(*cronExpr).Next(now)
+			nextTime := cronExpr.Next(now)
 			if nextTime.Sub(now) < 1*time.Minute {
 				return 1
 			}
