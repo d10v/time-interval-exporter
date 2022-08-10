@@ -45,7 +45,7 @@ func main() {
 
 	flag.Parse()
 
-	start := time.Now()
+	start := time.Unix(0, 0)
 
 	var oscillationFunc = func() float64 {
 		return math.Sin(2*math.Pi*float64(time.Since(start)) / float64(*oscillationPeriod))
