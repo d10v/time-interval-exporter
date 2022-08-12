@@ -10,10 +10,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// A simple example exposing fictional RPC latencies with different types of
-// random distributions (uniform, normal, and exponential) as Prometheus
-// metrics.
-
 package main
 
 import (
@@ -33,7 +29,6 @@ func main() {
 	var (
 		addr              = flag.String("listen-address", ":8080", "The address to listen on for HTTP requests.")
 		oscillationPeriod = flag.Duration("oscillation-period", 5*time.Minute, "The duration of the rate oscillation period.")
-		// cronExpr = flag.String("cron-expression", "*/5 * * * *", "Cron expression.")
 		cronExpr = cronexpr.MustParse("0-5,10-15,20-25,30-35,40-45,50-55 * * * *")
 	)
 
